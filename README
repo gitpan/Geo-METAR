@@ -53,8 +53,7 @@ EXAMPLES
     provided as examples. What you do with them is your business.
 
       simple_dump.pl	       Process a simple METAR.
-      fetch_weather.pl	       Fetch the weather and print it out.
-                               (Not complete yet.)
+      fetch_temp.pl	       Fetch the temperature and print it out.
 
 
 WISHLIST
@@ -63,7 +62,7 @@ WISHLIST
     Wishlist file in the distribution directory.
 
 
-$Id: README,v 1.6 1999/01/10 05:47:28 jzawodn Exp $
+$Id: README,v 1.7 1999/02/20 22:58:27 jzawodn Exp $
 
 
 

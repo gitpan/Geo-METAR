@@ -1,4 +1,8 @@
-Sat Feb 20 17:44:32 1999  jzawodn  <jzawodn@peach.z.org>
+Sat Feb 20 22:58:27 1999  jzawodn  <jzawodn@peach.z.org>
+
+	* README: Updated examples/fetch_temp.pl reference.
+
+	* METAR.pm: Doc fixes.
 
 	* METAR.pm: Fixed data scoping problem.
 
@@ -15,8 +19,6 @@ Sun Jan 10 05:47:28 1999  jzawodn  <jzawodn@peach.z.org>
 Wed Oct 28 03:06:39 1998  jzawodn  <jzawodn@peach.z.org>
 
 	* METAR.pm: Minor doc updates for the Geo:: change.
-
-	* test.pl: Updaed for Geo:: changes.
 
 	* METAR.pm:
 	Added Geo:: prefixes where they seem to be necessary. Need to test.
@@ -35,15 +37,7 @@ Sun Jun 28 04:10:34 1998  jzawodn  <jzawodn@peach.z.org>
 
 	* METAR.pm: Added lots of docs.
 
-	* test.pl: Added additional tests.
-
 	* README: Added the simple_dump.pl reference.
-
-	* test.pl: Tested.
-
-	* test.pl: Fixed references.
-
-	* test.pl: Initial revision
 
 	* METAR.pm: Fixing up POD.
 

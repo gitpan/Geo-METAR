@@ -1,0 +1,8 @@
+ChangeLog
+METAR.pm
+Makefile.PL
+README
+Wishlist
+t/metar.t
+examples/fetch_temp.pl
+examples/simple_dump.pl

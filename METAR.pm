@@ -1,4 +1,4 @@
-# $Id: METAR.pm,v 1.11 1999/02/20 17:44:32 jzawodn Exp $
+# $Id: METAR.pm,v 1.12 1999/02/20 22:36:04 jzawodn Exp $
 
 # This module is used for decoding NWS METAR code.
 
@@ -120,7 +120,7 @@ use Carp;
 
 ### Globals/Constants
 
-my $revision = '$Revision: 1.11 $';
+my $revision = '$Revision: 1.12 $';
    $revision =~ m/(\d+\.\d+)/;
    $revision = $1;
    $VERSION  = $revision;
@@ -801,7 +801,7 @@ Copyright 1998-99, Jeremy D. Zawodny <jzawodn@wcnet.org>
 Geo::METAR is covered under the GNU Public License (GPL) version 2 or
 later.
 
-The Net::CDDB Web site is located at:
+The Geo::METAR Web site is located at:
 
   http://www.wcnet.org/~jzawodn/perl/Geo-METAR/
 
