@@ -1,8 +1,0 @@
-Sat Feb 20 23:15:40 1999  jzawodn  <jzawodn@peach>
-
-	* metar.t: Damn off-by-one error.
-
-	* metar.t: New tests.
-
-	* metar.t: Initial revision
-

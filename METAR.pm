@@ -1,4 +1,4 @@
-# $Id: METAR.pm,v 1.4 1999/11/19 00:41:09 jzawodn Exp $
+# $Id: METAR.pm,v 1.8 2000/11/25 00:07:38 jzawodn Exp $
 
 # This module is used for decoding NWS METAR code.
 
@@ -105,41 +105,86 @@
 # informative of special conditions.
 #
 # Remarks begin with the "RMK" keyword and continue to the end of the line.
-#
-# This module currently doesn't attempt to decode remarks but may in the
-# future.
 
 ### Package Definition
 
 package Geo::METAR;
 
-### Required Modules
+## Required Modules
 
-require 5.004;
-use Carp;
+use 5.005;
+use strict;
+use vars qw($AUTOLOAD $VERSION);
+use Carp 'cluck';
 
-### Globals/Constants
+$VERSION = '1.14';
 
-my $revision = 'Revision: 1.13';
-   $revision =~ m/(\d+\.\d+)/;
-   $revision = $1;
-   $VERSION  = $revision;
-my $debug       = 0;
+##
+## Lookup tables
+##
 
+my %_weather_types = (
+        MI => 'shallow',
+	PI => 'partial',
+	BC => 'patches',
+	DR => 'drizzle',
+	BL => 'blowing',
+	SH => 'shower(s)',
+	TS => 'thunderstorm',
+	FZ => 'freezing',
 
-### Begin Object Methods
+	DZ => 'drizzle',
+	RA => 'rain',
+	SN => 'snow',
+	SG => 'snow grains',
+	IC => 'ice crystals',
+	PE => 'ice pellets',
+	GR => 'hail',
+	GS => 'small hail/snow pellets',
+	UP => 'unknown precip',
 
-# Constructor.
+	BR => 'mist',
+	FG => 'fog',
+	FU => 'smoke',
+	VA => 'volcanic ash',
+	DU => 'dust',
+	SA => 'sand',
+	HZ => 'haze',
+	PY => 'spray',
 
-sub new {
+	PO => 'dust/sand whirls',
+	SQ => 'squalls',
+	FC => 'funnel cloud(tornado/waterspout)',
+	SS => 'sand storm',
+	DS => 'dust storm'
+    );
+
+my $_weather_types_pat = join("|", keys(%_weather_types));
+
+my %_sky_types = (
+	SKC => "Sky Clear",
+	CLR => "Sky Clear",
+	SCT => "Scattered",
+	BKN => "Broken",
+	FEW => "Few",
+	OVC => "Solid Overcast",
+);
+
+##
+## Constructor.
+##
+
+sub new
+{
     my $this = shift;
     my $class = ref($this) || $this;
     my $self = {};
 
-    ### Instance Variables
-
-    # UPPERCASE items have accssor functions (methods), while
-    # lowercase items are reserved for internal use.
+    ##
+    ## UPPERCASE items have documented accssor functions (methods) or
+    ## use AUTOLOAD, while lowercase items are reserved for internal
+    ## use.
+    ##
 
     $self->{VERSION}       = $VERSION;          # version number
     $self->{METAR}         = undef;             # the actual, raw METAR
@@ -151,18 +196,25 @@ sub new {
     $self->{WIND_DIR_DEG}  = undef;             # wind dir in degrees
     $self->{WIND_DIR_ENG}  = undef;             # wind dir in english (NW/SE)
     $self->{WIND_KTS}      = undef;             # wind speed (knots)
-    $self->{WIND_KTS_GUST} = undef;             # wind gusts (knots)
+    $self->{WIND_GUST_KTS} = undef;             # wind gusts (knots)
     $self->{WIND_MPH}      = undef;             # wind speed (MPH)
-    $self->{WIND_MPH_GUST} = undef;             # wind gusts (MPH)
+    $self->{WIND_GUST_MPH} = undef;             # wind gusts (MPH)
     $self->{VISIBILITY}    = undef;             # visibility info
     $self->{RUNWAY}        = undef;             # runyway vis.
     $self->{WEATHER}       = [ ];               # current weather
+    $self->{WEATHER_LOG}   = [ ];               # weather log
     $self->{SKY}           = [ ];               # curent sky
-    $self->{C_TEMP}        = undef;             # current temp, celcius
-    $self->{F_TEMP}        = undef;             # converted to farenheit
-    $self->{C_DEW}         = undef;             # dew point, celcius
-    $self->{F_DEW}         = undef;             # dew point, farenheit
+    $self->{TEMP_F}        = undef;             # current temp, celcius
+    $self->{TEMP_C}        = undef;             # converted to farenheit
+    $self->{DEW_F}         = undef;             # dew point, celcius
+    $self->{DEW_C}         = undef;             # dew point, farenheit
+    $self->{HOURLY_TEMP_F} = undef;             # hourly current temp, celcius
+    $self->{HOURLY_TEMP_C} = undef;             # hourly converted to farenheit
+    $self->{HOURLY_DEW_F}  = undef;             # hourly dew point, celcius
+    $self->{HOURLY_DEW_C}  = undef;             # hourly dew point, farenheit
+    $self->{HOURLY_PRECIP} = undef;             # hourly precipitation
     $self->{ALT}           = undef;             # altimeter setting [pressure]
+    $self->{SLP}           = undef;             # sea level pressure
     $self->{REMARKS}       = undef;             # remarks and such
 
     $self->{tokens}        = [ ];               # the "token" list
@@ -179,56 +231,103 @@ sub new {
     $self->{sky}           = [ ];               # sky conditions (cloud cover)
     $self->{temp_dew}      = undef;             # temp and dew pt.
     $self->{alt}           = undef;             # altimeter setting
+    $self->{slp}           = undef;             # sea level pressure
     $self->{remarks}       = [ ];               # remarks
 
+    $self->{debug}         = undef;             # enable debug trace
 
     bless $self, $class;
     return $self;
 }
 
-# ----------------------------------------------- #
+##
+## Autoload for access methods to stuff in %fields hash. We should
+## probably disallow access to the lower-case items as stated above,
+## but I don't feel like being a Nazi about it. Besides, I haven't
+## checked to see what that might break.
+##
 
-# Autoload for access methods to stuff in %fields hash
-
-sub AUTOLOAD {
+sub AUTOLOAD
+{
     my $self = shift;
-    my $type = ref($self) || croak "$self is not an object";
-    my $name = $AUTOLOAD;
-    $name =~ s/.*:://;          # strip fully-qualified portion of name
-    unless (exists $self->{$name}) {
-        croak "You suck.  You tried to access something that is not here.";
+
+    if (not ref $self)
+    {
+	cluck "bad AUTOLOAD for obj [$self]";
     }
-    return $self->{$name};
-} # end AUTOLOAD
 
-# ----------------------------------------------- #
+    if ($AUTOLOAD =~ /.*::(.*)/)
+    {
+        my $key = $1;
 
-# Get current version number.
 
-sub version {
+        ## Backward compatible temps...
+
+        my %compat = (
+                      F_TEMP    =>  'TEMP_F',
+                      C_TEMP    =>  'TEMP_C',
+                      F_DEW     =>  'DEW_F',
+                      C_DEW     =>  'DEW_C',
+                     );
+
+        if ($compat{$key})
+        {
+            $key = $compat{$key};
+        }
+
+        ## Check for the items...
+
+        if (exists $self->{$key})
+        {
+            return $self->{$key};
+        }
+        else
+        {
+            return undef;
+        }
+    }
+    else
+    {
+        warn "strange AUTOLOAD problem!";
+        return undef;
+    }
+}
+
+##
+## Get current version number.
+##
+
+sub version
+{
     my $self = shift;
-    print "version() called.\n" if $debug;
+    print "version() called.\n" if $self->{debug};
     return $self->{VERSION};
 }
 
-# ----------------------------------------------- #
+##
+## Take a METAR, tokenize, and process it.
+##
 
-sub metar {
+sub metar
+{
     my $self = shift;
-    if (@_) {
-        $self->{METAR} = shift; 
-        $self->{METAR} =~ s/\n//goi;    # nuke any newlines
+
+    if (@_)
+    {
+        $self->{METAR} = shift;
+        $self->{METAR} =~ s/\n//g;    ## nuke any newlines
         _tokenize($self);
         _process($self);
     }
     return $self->{METAR};
 }
 
-# ----------------------------------------------- #
+##
+## Break {METAR} into parts. Stuff into @tokens.
+##
 
-# Break {METAR} into parts. Stuff into @tokens.
-
-sub _tokenize {
+sub _tokenize
+{
     my $self = shift;
     my $tok;
     my @toks;
@@ -236,149 +335,434 @@ sub _tokenize {
     # Split tokens on whitespace.
     @toks = split(/\s+/, $self->{METAR});
     $self->{tokens} = \@toks;
-
 }
 
-# ----------------------------------------------- #
+## Process @tokens to populate METAR values.
+##
+## This is a long and involved subroutine. It basically copies the
+## @tokens array and treats it as a stack, popping off items,
+## examining them, and see what they look like.  Based on their
+## "apppearance" it takes care populating the proper fields
+## internally.
 
-# Process @tokens to populate METAR values.
-#
-# This is a long and involved subroutine. It basically
-# copies the @tokens array and treats it as a stack, popping
-# off items, examining them, and see what they look like.
-# Based on their "apppearance" it takes care populating the
-# proper fields internally.
-
-sub _process {
-
+sub _process
+{
     my $self = shift;
 
     my @toks = @{$self->{tokens}};      # copy tokens array...
 
     my $tok;
+    my $in_remarks = 0;                 # started processing remarks
 
-    # This is a semi-brute-force way of doing things, but the
-    # amount of data is relatively small, so it shouldn't be
-    # a big deal.
-    #
-    # Ideally, I'd have it skip checks for items which have
-    # been found, but that would make this more "linear" and
-    # I'd remove the pretty while loop.
+    ## This is a semi-brute-force way of doing things, but the amount
+    ## of data is relatively small, so it shouldn't be a big deal.
+    ##
+    ## Ideally, I'd have it skip checks for items which have been
+    ## found, but that would make this more "linear" and I'd remove
+    ## the pretty while loop.
 
-    while($tok = shift(@toks)) {        # as long as there are tokens
+    ## Assume standard report by default
 
-        print "trying to match [$tok]\n" if $debug;
+    $self->{type} = "METAR";
+    $self->{TYPE} = "Routine Weather Report";
 
-        # is it a report type?
+    while (defined($tok = shift(@toks))) ## as long as there are tokens
+    {
+        print "trying to match [$tok]\n" if $self->{debug};
 
-        if (($tok =~ /METAR/i) or ($tok =~ /SPECI/i)) {
+        ##
+        ## is it a report type?
+        ##
+
+        if (($tok =~ /METAR/i) or ($tok =~ /SPECI/i))
+        {
             $self->{type} = $tok;
-            print "[$tok] is a report type.\n" if $debug;
-            next;
 
-            # is is a site ID?
-        } elsif ($tok =~ /K[A-Z]{3,3}/) {       
-            $self->{site} = $tok;
-            print "[$tok] is a site ID.\n" if $debug;
-            next;
-
-            # is it a date/time?
-        } elsif($tok =~ /\d{6,6}Z/i) {
-            $self->{date_time} = $tok;
-            print "[$tok] is a date/time.\n" if $debug;
-            next;
-
-            # is it a report modifier?
-        } elsif(($tok =~ /AUTO/i) or ($tok =~ /COR/i)) {
-            $self->{modifier} = $tok;
-            print "[$tok] is a report modifier.\n" if $debug;
-            next;
-
-            # is it wind information?
-        } elsif($tok =~ /.*?KT$/i) {
-            $self->{wind} = $tok;
-            print "[$tok] is wind information.\n" if $debug;
-            next;
-
-            # is it visibility information?
-        } elsif($tok =~ /.*?SM$/i) {
-            $self->{visibility} = $tok;
-            print "[$tok] is visibility information.\n" if $debug;
-            next;
-
-            # is it visibility information with a leading digit?
-        } elsif($tok =~ /^\d$/) {
-
-            $tok .= " " . shift(@toks);
-            $self->{visibility} = $tok;
-            print "[$tok is multi-part visibility information.\n" if $debug;
-            next;
-
-            # is it runway visibility info?
-        } elsif($tok =~ /R.*?FT$/i) {
-            $self->{runway} = $tok;
-            print "[$tok] is runway visual information.\n" if $debug;
-            next;
-
-            # is it current weather info?
-        } elsif($tok =~ /^(-|\+|VC)?(TS|SH|FZ|BL|DR|MI|BC|PR|RA|DZ|SN|SG|GR|GS|PE|IC|UP|BR|FG|FU|VA|DU|SA|HZ|PY|PO|SQ|FC|SS|DS)+$/) {
-
-            push(@{$self->{weather}},$tok);
-            print "[$tok] is current weather.\n" if $debug;
-            next;
-
-            # is it sky conditions (clouds)?
-        } elsif(($tok =~ /SKC|CLR/i) or
-                ($tok =~ /(FEW|SCT|BKN|OVC)(\d\d\d)(CB|TCU)?$/i)) {
-
-            push(@{$self->{sky}},$tok);
-            print "[$tok] is a sky condition.\n" if $debug;
-            next;
-
-            # is it temperature and dew point info?
-        } elsif($tok =~ /(M?\d\d)\/(M?\d\d)/i) {
-            next if $self->{temp_dew};
-            $self->{temp_dew} = $tok;
-            print "[$tok] is temperature/dew point information.\n" if $debug;
-            next;
-
-            # is it an altimeter setting?
-        } elsif($tok =~ /A\d{4,4}$/i) {
-
-            $self->{alt} = $tok;
-            print "[$tok] is an altimeter setting.\n" if $debug;
-            next;
-
-            # remarks?
-        } elsif($tok =~ /^RMK$/i) {
-
-            push(@{$self->{remarks}},$tok);
-            print "[$tok] is a remark.\n" if $debug;
-            next;
-
-        # unknown. assume remarks
-        } else {
-
-            push(@{$self->{remarks}},$tok);
-            print "[$tok] is unknown. Assuming remarks.\n" if $debug;
+            if ($self->{type} eq "METAR")
+            {
+                $self->{TYPE} = "Routine Weather Report";
+            }
+            elsif ($self->{type} eq "SPECI")
+            {
+                $self->{TYPE} = "Special Weather Report";
+            }
+            print "[$tok] is a report type.\n" if $self->{debug};
             next;
         }
 
-    } # end while
+        ##
+        ## is is a site ID?
+        ##
 
-    # Now that the internal stuff is set, let's do the external
-    # stuff.
+        elsif ($tok =~ /K[A-Z]{3,3}/)
+        {
+            $self->{site} = $tok;
+            print "[$tok] is a site ID.\n" if $self->{debug};
+            next;
+        }
 
-    if ($self->{type} eq "METAR") {
-        $self->{TYPE} = "Routine Weather Report";
+        ##
+        ## is it a date/time?
+        ##
+
+        elsif ($tok =~ /\d{6,6}Z/i)
+        {
+            $self->{date_time} = $tok;
+            print "[$tok] is a date/time.\n" if $self->{debug};
+            next;
+
+
+        }
+
+        ##
+        ## is it a report modifier?
+        ##
+
+        elsif (($tok =~ /AUTO/i) or ($tok =~ /COR/i))
+        {
+            $self->{modifier} = $tok;
+            print "[$tok] is a report modifier.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it wind information?
+        ##
+
+        elsif ($tok =~ /.*?KT$/i)
+        {
+            $self->{wind} = $tok;
+            print "[$tok] is wind information.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it visibility information?
+        ##
+
+        elsif ($tok =~ /.*?SM$/i)
+        {
+            $self->{visibility} = $tok;
+            print "[$tok] is visibility information.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it visibility information with a leading digit?
+        ##
+
+        elsif ($tok =~ /^\d$/)
+        {
+            $tok .= " " . shift(@toks);
+            $self->{visibility} = $tok;
+            print "[$tok is multi-part visibility information.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it runway visibility info?
+        ##
+
+        elsif ($tok =~ /R.*?FT$/i)
+        {
+            $self->{runway} = $tok;
+            print "[$tok] is runway visual information.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it current weather info?
+        ##
+
+        elsif ($tok =~ /^(-|\+)?(VC)?($_weather_types_pat)+/i)
+        {
+            my $engl = "";
+            my $qual = $1;
+            my $addlqual = $2;
+
+            ## qualifier
+
+            if (defined $qual)
+            {
+                if ( $qual eq "-" ) {
+                    $engl = "light";
+                } elsif ( $qual eq "+" ) {
+                    $engl = "heavy";
+                } else {
+                    $engl = ""; ## moderate
+                }
+            }
+            else
+            {
+                $engl = ""; ## moderate
+            }
+
+            while ( $tok =~ /($_weather_types_pat)/gi )
+            {
+                $engl .= " " . $_weather_types{$1}; ## figure out weather
+            }
+
+            ## addl qualifier
+
+            if (defined $addlqual)
+            {
+                if ( $addlqual eq "VC" )
+                {
+                    $engl .= " in vicinity";
+                }
+            }
+
+            $engl =~ s/^\s//gio;
+            $engl =~ s/\s\s/ /gio;
+
+            push(@{$self->{WEATHER}},$engl);
+
+            push(@{$self->{weather}},$tok);
+            print "[$tok] is current weather.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it sky conditions (clear)?
+        ##
+
+        elsif ( $tok eq "SKC" || $tok eq "CLR" )
+        {
+            push(@{$self->{sky}},$tok);
+            push(@{$self->{SKY}}, "Sky Clear");
+        }
+
+        ##
+        ## is it sky conditions (clouds)?
+        ##
+
+        elsif ( $tok =~ /^(FEW|SCT|BKN|OVC|SKC|CLR)(\d\d\d)?(CB|TCU)?$/i)
+        {
+            push(@{$self->{sky}},$tok);
+            my $engl = "";
+
+            $engl = $_sky_types{$1};
+
+            if (defined $3)
+            {
+                if ($3 eq "TCU")
+                {
+                    $engl .= " Towering Cumulus";
+                }
+                elsif ($3 eq "CB")
+                {
+                    $engl .= " Cumulonimbus";
+                }
+            }
+
+            if ($2 ne "")
+            {
+                my $agl = int($2)*100;
+                $engl .= " at $agl" . "ft";
+            }
+
+            push(@{$self->{SKY}}, $engl);
+            print "[$tok] is a sky condition.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it temperature and dew point info?
+        ##
+
+        elsif ($tok =~ /(M?\d\d)\/(M?\d\d)/i)
+        {
+            next if $self->{temp_dew};
+            $self->{temp_dew} = $tok;
+
+            $self->{TEMP_C} = $1;
+            $self->{DEW_C} = $2;
+            $self->{TEMP_C} =~ s/^M/-/;
+            $self->{DEW_C} =~ s/^M/-/;
+
+            print "[$tok] is temperature/dew point information.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## is it an altimeter setting?
+        ##
+
+        elsif (!$in_remarks && $tok =~ /^A(\d\d)(\d\d)$/i)
+        {
+            $self->{alt} = $tok;
+            $self->{ALT} = "$1.$2";
+            print "[$tok] is an altimeter setting.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## automatic station type?
+        ##
+
+        elsif ($in_remarks && $tok =~ /^A(O\d)$/i)
+        {
+            $self->{autostationtype} = $tok;
+            $self->{AUTO_STATIONTYPE} = $1;
+            print "[$tok] is an automatic station type remark.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## remarks?
+        ##
+
+        elsif ($tok =~ /^RMK$/i)
+        {
+            push(@{$self->{remarks}},$tok);
+            $in_remarks = 1;
+            print "[$tok] is a remark.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## sea level pressure
+        ##
+
+        elsif ($tok =~ /^SLP(\d+)/i)
+        {
+            $self->{slp} = $tok;
+            $self->{SLP} = "$1 mb";
+            print "[$tok] is a sea level pressure.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## sea level pressure not available
+        ##
+
+        elsif ($tok eq "SLPNO")
+        {
+            $self->{slp} = "SLPNO";
+            $self->{SLP} = "not available";
+            print "[$tok] is a sea level pressure.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## hourly precipitation
+        ##
+
+        elsif ($tok =~ /^P(\d\d\d\d)$/i)
+        {
+            $self->{hourlyprecip} = $tok;
+
+            if ( $1 eq "0000" ) {
+                $self->{HOURLY_PRECIP} = "Trace";
+            } else {
+                $self->{HOURLY_PRECIP} = $1;
+            }
+        }
+
+        ##
+        ## weather begin/end times
+        ##
+
+        elsif ($tok =~ /^($_weather_types_pat)([BE\d]+)$/i)
+        {
+            my $engl = "";
+            my $times = $2;
+
+            $self->{weatherlog} = $tok;
+
+            $engl = $_weather_types{$1};
+
+            while ( $times =~ /(B|E)(\d\d)/g )
+            {
+                if ( $1 eq "B" ) {
+                    $engl .= " began :$2";
+                } else {
+                    $engl .= " ended :$2";
+                }
+            }
+
+            push(@{$self->{WEATHER_LOG}}, $engl);
+            print "[$tok] is a weather log.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## remarks for significant cloud types
+        ##
+
+        elsif ($in_remarks && ($tok eq "CB" || $tok eq "TCU"))
+        {
+            push(@{$self->{sigclouds}}, $tok);
+
+            if ( $tok eq "CB" ) {
+                push(@{$self->{SIGCLOUDS}}, "Cumulonimbus");
+            } elsif ( $tok eq "TCU" ) {
+                push(@{$self->{SIGCLOUDS}}, "Towering Cumulus");
+            }
+        }
+
+        ##
+        ## hourly temp/dewpoint
+        ##
+
+        elsif ($tok =~ /^T(\d)(\d\d)(\d)(\d)(\d\d)(\d)$/i)
+        {
+            $self->{hourlytempdew} = $tok;
+            if ( $1 == 1 ) {
+                $self->{HOURLY_TEMP_C} = "-";
+            }
+            $self->{HOURLY_TEMP_C} .= "$2.$3";
+
+            $self->{HOURLY_DEW_C} = "";
+            if ( $4 == 1 ) {
+                $self->{HOURLY_DEW_C} = "-";
+            }
+            $self->{HOURLY_DEW_C} .= "$5.$6";
+
+            print "[$tok] is a hourly temp and dewpoint.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## unknown, not in remarks yet
+        ##
+
+        elsif (!$in_remarks)
+        {
+            push(@{$self->{unknown}},$tok);
+            push(@{$self->{UNKNOWN}},$tok);
+            print "[$tok] is unknown.\n" if $self->{debug};
+            next;
+        }
+
+        ##
+        ## unknown. assume remarks
+        ##
+
+        else
+        {
+            push(@{$self->{remarks}},$tok);
+            push(@{$self->{REMARKS}},$tok);
+            print "[$tok] is unknown remark.\n" if $self->{debug};
+            next;
+        }
+
     }
+
+    ##
+    ## Now that the internal stuff is set, let's do the external
+    ## stuff.
+    ##
+
     $self->{SITE} = $self->{site};
     $self->{DATE} = substr($self->{date_time},0,2);
     $self->{TIME} = substr($self->{date_time},2,4) . " UTC";
     $self->{TIME} =~ s/(\d\d)(\d\d)/$1:$2/o;
     $self->{MOD}  = $self->{modifier};
 
-    # Okay, wind finally gets interesting.
+    ##
+    ## Okay, wind finally gets interesting.
+    ##
 
     {
         my $wind = $self->{wind};
@@ -408,11 +792,11 @@ sub _process {
             } elsif ($dir_deg < 195) {
                 $dir_eng = "South";
             } elsif ($dir_deg < 210) {
-                $dir_eng = "South/Southeast";
+                $dir_eng = "South/Southwest";
             } elsif ($dir_deg < 240) {
                 $dir_eng = "Southwest";
             } elsif ($dir_deg < 265) {
-                $dir_eng = "South/Southwest";
+                $dir_eng = "West/Southwest";
             } elsif ($dir_deg < 285) {
                 $dir_eng = "West";
             } elsif ($dir_deg < 300) {
@@ -424,7 +808,7 @@ sub _process {
             } else {
                 $dir_eng = "North";
             }
-        } # end if
+        }
 
         $wind =~ /...(\d\d\d?)/o;
         my $kts_speed = $1;
@@ -435,20 +819,22 @@ sub _process {
         if ($wind =~ /.{5,6}G(\d\d\d?)/o) {
             $kts_gust = $1;
             $mph_gust = $kts_gust * 1.1508;
-        } # end if
+        }
 
         $self->{WIND_KTS} = $kts_speed;
         $self->{WIND_MPH} = $mph_speed;
 
-        $self->{WIND_KTS_GUST} = $kts_gust;
-        $self->{WIND_MPH_GUST} = $mph_gust;
+        $self->{WIND_GUST_KTS} = $kts_gust;
+        $self->{WIND_GUST_MPH} = $mph_gust;
 
         $self->{WIND_DIR_DEG} = $dir_deg;
         $self->{WIND_DIR_ENG} = $dir_eng;
 
-    } # end wind block
+    }
 
-    # Visibility, now.
+    ##
+    ## Visibility.
+    ##
 
     {
         my $vis = $self->{visibility};
@@ -458,30 +844,31 @@ sub _process {
         } else {
             $self->{VISIBILITY} = $vis . " Statute Miles";
         } # end if
-
-    } # end visibility block
-
-    # And F/C temperatures.
-
-    {
-        my ($tmp,$dew) = split(/\//, $self->{temp_dew});
-
-        # check for negative values
-        $tmp =~ s/^M/-/o;
-        $dew =~ s/^M/-/o;
-
-        # convert celcius to farenheit
-        $self->{C_TEMP} = $tmp;
-        $self->{F_TEMP} = (($tmp * (9/5)) + 32);
-        $self->{C_DEW} = $dew;
-        $self->{F_DEW} = (($dew * (9/5)) + 32);
     }
 
+    ##
+    ## Calculate F temps for all C temps
+    ##
+
+    foreach my $key ( keys(%$self) )
+    {
+        if ( uc($key) eq $key && $key =~ /^(.*)_C$/ )
+        {
+            my $fkey = $1 . "_F";
+
+            next unless defined $self->{$key};
+
+            $self->{$fkey} = sprintf("%.1f", (($self->{$key} * (9/5)) + 32));
+        }
+    }
 }
 
-# ----------------------------------------------- #
+##
+## Print the tokens--usually when debugging.
+##
 
-sub print_tokens {
+sub print_tokens
+{
     my $self = shift;
     my $tok;
     foreach $tok (@{$self->{tokens}}) {
@@ -489,28 +876,31 @@ sub print_tokens {
     }
 }
 
-# ----------------------------------------------- #
+##
+## Turn debugging on/off.
+##
 
-sub debug {
+sub debug
+{
     my $self = shift;
     my $flag = shift;
-
-    return $debug unless defined $flag;
+    return $self->{debug} unless defined $flag;
 
     if (($flag eq "Y") or ($flag eq "y") or ($flag == 1)) {
-        $debug = 1;
+        $self->{debug} = 1;
     } elsif (($flag eq "N") or ($flag eq "n") or ($flag == 0)) {
-        $debug = 0;
+        $self->{debug} = 0;
     }
-    return $debug;
+
+    return $self->{debug};
 }
 
-# ----------------------------------------------- #
+##
+## Dump internal data structure. Useful for debugging and such.
+##
 
-# Dump internal data structure. Useful for debugging and such.
-
-sub dump {
-
+sub dump
+{
     my $self = shift;
 
     print "METAR dump follows.\n\n";
@@ -526,33 +916,24 @@ sub dump {
     print "sky: " . join(', ', @{$self->{sky}}) . "\n";
     print "temp_dew: $self->{temp_dew}\n";
     print "alt: $self->{alt}\n";
+    print "slp: $self->{slp}\n";
     print "remarks: " . join (', ', @{$self->{remarks}}) . "\n";
     print "\n";
-    print "VERSION: $self->{VERSION}\n";
-    print "METAR: $self->{METAR}\n";
-    print "TYPE: $self->{TYPE}\n";
-    print "SITE: $self->{SITE}\n";
-    print "DATE: $self->{DATE}\n";
-    print "TIME: $self->{TIME}\n";
-    print "MOD: $self->{MOD}\n";
-    print "WIND_DIR_DEG: $self->{WIND_DIR_DEG}\n";
-    print "WIND_DIR_ENG: $self->{WIND_DIR_ENG}\n";
-    print "WIND_KTS: $self->{WIND_KTS}\n";
-    print "WIND_MPH: $self->{WIND_MPH}\n";
-    print "WIND_KTS_GUST: $self->{WIND_KTS_GUST}\n";
-    print "WIND_MPH_GUST: $self->{WIND_MPH_GUST}\n"; 
-    print "VISIBILITY: $self->{VISIBILITY}\n";
-    print "C_TEMP: $self->{C_TEMP}\n";
-    print "F_TEMP: $self->{F_TEMP}\n";
-    print "C_DEW: $self->{C_DEW}\n";
-    print "F_DEW: $self->{F_DEW}\n";
-}
 
-# ----------------------------------------------- #
-# ----------------------------------------------- #
-# ----------------------------------------------- #
-# ----------------------------------------------- #
-# ----------------------------------------------- #
+    foreach my $var ( sort(keys(%$self)) )
+    {
+        next if ( uc($var) ne $var );
+
+        if ( ref($self->{$var}) eq "ARRAY" )
+        {
+            print "$var: ", join(", ", @{$self->{$var}}), "\n";
+        }
+        else
+        {
+            print "$var: ", $self->{$var}, "\n";
+        }
+    }
+}
 
 1;
 
@@ -560,7 +941,7 @@ __END__
 
 =head1 NAME
 
-METAR - Process routine aviation weather reports in the METAR format.
+Geo::METAR - Process aviation weather reports in the METAR format.
 
 =head1 SYNOPSIS
 
@@ -568,7 +949,7 @@ METAR - Process routine aviation weather reports in the METAR format.
   use strict;
 
   my $m = new Geo::METAR;
-  $m->metar("KFDY 251450Z 21012G21KT 8SM OVC065 04/M01 A3010 RMK 57014 ");
+  $m->metar("KFDY 251450Z 21012G21KT 8SM OVC065 04/M01 A3010 RMK 57014");
   print $m->dump;
 
   exit;
@@ -719,11 +1100,11 @@ The current wind speed in Knots.
 
 The current wind speed in Miles Per Hour.
 
-=item WIND_KTS_GUST
+=item WIND_GUST_KTS
 
 The current wind gusting speed in Knots.
 
-=item WIND_MPH_GUST
+=item WIND_GUST_MPH
 
 The current wind gusting speed in Miles Per Hour.
 
@@ -747,11 +1128,11 @@ Current weather.
 
 Current sky conditions.
 
-=item C_TEMP
+=item TEMP_C
 
 Temperature in Celsius.
 
-=item F_TEMP
+=item TEMP_F
 
 Temperature in Farenheit.
 
@@ -791,12 +1172,20 @@ That'd be cool, I think.
 
 =head1 BUGS
 
-The only known bug was corrected in the latest release. Please report
-any bugs that you find.
+There currently aren't any known BUGS (features which don't work as
+advetised). There are lacking features. See the TODO section for more
+on that.
+
+=head1 TODO
+
+There is a TODO file included in the Geo::METAR distribution listing
+the outstanding tasks that I or others have devised. Please check that
+list before you submit a bug report or request a new feture. It might
+already be on the TODO list.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright 1997-99, Jeremy D. Zawodny <Jeremy@Zawodny.com>
+Copyright 1997-2000, Jeremy D. Zawodny <Jeremy@Zawodny.com>
 
 Geo::METAR is covered under the GNU Public License (GPL) version 2 or
 later.
@@ -805,4 +1194,36 @@ The Geo::METAR Web site is located at:
 
   http://www.wcnet.org/~jzawodn/perl/Geo-METAR/
 
+=head1 CREDITS
+
+In addition to my work on Geo::METAR, I've received ideas, help, and
+patches from the following folks:
+
+  * Otterboy <jong@watchguard.com>
+
+    Random script fixes and initial debugging help
+
+  * Remi Lefebvre <remi@solaria.dhis.org>
+
+    Debian packaging as libgeo-metar-perl.deb.
+
+  * Mike Engelhart <mengelhart@earthtrip.com>
+
+    Wind direction naming corrections.
+
+  * Michael Starling <mstarling@logic.bm>
+
+    Wind direction naming corrections.
+
+  * Hans Einar Nielssen <hans.einar@nielssen.com>
+
+    Wind direction naming corrections.
+
+  * Nathan Neulinger <nneul@umr.edu>
+
+    Lots of enhancements and corrections. Too many to list here.
+
 =cut
+
+
+

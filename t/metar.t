@@ -1,7 +1,7 @@
 #!/usr/bin/perl
-
-# $Id: metar.t,v 1.3 1999/02/20 23:15:40 jzawodn Exp $
-
+#
+# $Id: metar.t,v 1.4 2000/11/24 23:43:08 jzawodn Exp $
+#
 # Test script for METAR installation.
 
 use strict;
@@ -19,13 +19,15 @@ my $m = new Geo::METAR;
 
 # Create a new instance.
 
-if ($m) {
+if (ref $m eq 'Geo::METAR') {
     ok(1);
 } else {
     ok(0);
 }
 
-# Set to a given user.
+##
+## Try out one hard-coded example. We need many more of these.
+##
 
 if ($m->metar("KFDY 251450Z 21012G21KT 8SM OVC065 04/M01 A3010 RMK 57014")) {
     ok(1);
@@ -51,7 +53,7 @@ if ($m->MOD eq "AUTO") {
     ok(0);
 }
 
-if ($m->F_TEMP eq "39.2") {
+if ($m->TEMP_F eq "39.2") {
     ok(1);
 } else {
     ok(0);
@@ -60,5 +62,3 @@ if ($m->F_TEMP eq "39.2") {
 exit;
 
 __END__
-
-

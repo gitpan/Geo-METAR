@@ -1,37 +1,43 @@
                         Readme for Geo::METAR
 
-	  Accessing Aviation Weather Information with Perl.
+          Accessing Aviation Weather Information with Perl.
 
-     Copyright (c) 1997-99, Jeremy D. Zawodny <jzawodn@wcnet.org>
+   Copyright (c) 1997-2000, Jeremy D. Zawodny <Jeremy@Zawodny.com>
 
 
 BACKGROUND
 
-    This is the README file for Geo::METAR.pm.
+    This is the README file for the Geo::METAR Perl module.
 
     The Geo::METAR home page is located at:
-      http://www.wcnet.org/~jzawodn/perl/Geo-METAR/
+
+        http://www.wcnet.org/jzawodn/perl/Geo-METAR/
 
     There may be bugs in the code as well as in the documentation. If
     you find either, I'd appreciate a patch or at least a mail message
-    to let me know what's wrong.
+    to let me know what's wrong so that I can add it to the TODO list.
 
     Geo::METAR as been developed and tested on Linux and Solaris as
-    well as Windows NT. It may well work on other platforms. If you
-    install it on another platform, I'd like to hear about it. If you
-    develop patches for that platform, I'd REALLY like to hear about
-    it. Send me a note. There's nothing that I know to be
-    platform-dependent in here, but you never know.
+    well as Windows NT. It may well work on other platforms. It is
+    pure Perl. If you install it on another platform, and have trouble
+    I'd like to hear about it. If you develop patches for that
+    platform, I'd REALLY like to hear about it. Send me a note.
+
+REQUIREMENTS
+
+    You will need Perl 5.005 or newer to install and use
+    Geo::METAR. It may work with older versions of Perl, but I make no
+    guarantees.
 
 
 INSTALLATION
 
     Installing Geo::METAR is an easy process.
 
-      % perl Makefile.PL
-      % make
-      % make test
-      % make install
+      $ perl Makefile.PL
+      $ make
+      $ make test
+      $ make install
 
 
 DOCUMENTATION
@@ -47,22 +53,21 @@ DOCUMENTATION
     and generate it in alternative formats.
 
 
-EXAMPLES
+EXAMPLE SCRIPTS
 
-    The following scripts are included in the examples directory. They are
-    provided as examples. What you do with them is your business.
+    The following scripts are included in the `examples'
+    directory. They are provided as examples. They should provide an
+    idea of what you can do with this module.
 
       simple_dump.pl	       Process a simple METAR.
       fetch_temp.pl	       Fetch the temperature and print it out.
 
+    If you develop a good example that would be useful to others, I'd
+    be glad to add it to the distribution.
 
-WISHLIST
+
+TODO LIST
 
     If you're wondering what will come next in Geo::METAR, see the
-    Wishlist file in the distribution directory.
-
-
-$Id: README,v 1.2 1999/11/19 00:37:46 jzawodn Exp $
-
-
+    TODO file.
 

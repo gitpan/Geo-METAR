@@ -1,0 +1,7 @@
+Notes for folks hacking on Geo::METAR
+=====================================
+
+If you use Emacs to edit the code, I recommend cperl-mode an the
+cperl-style `C++'. It's what I use.
+
+Feel free to add things to the TODO list.

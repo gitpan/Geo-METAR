@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: fetch_temp.pl,v 1.2 1999/11/19 00:11:58 jzawodn Exp $
+# $Id: fetch_temp.pl,v 1.3 2000/11/25 00:03:12 jzawodn Exp $
 
 # Brief Description
 # =================
@@ -65,8 +65,8 @@ if (!$response->is_success) {
     $m->metar($metar);
 
     # ask for the temperature(s)
-    my $f_temp = $m->F_TEMP;
-    my $c_temp = $m->C_TEMP;
+    my $f_temp = $m->TEMP_F;
+    my $c_temp = $m->TEMP_C;
 
     my $time = localtime(time);
     print "The temperature at $site_code is $f_temp F ($c_temp C) as of $time.\n";

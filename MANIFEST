@@ -1,11 +1,8 @@
 METAR.pm
 Makefile.PL
 README
-examples/simple_dump.pl
-examples/fetch_temp.pl
-examples/ChangeLog
-ChangeLog
+HACKING
+TODO
 t/metar.t
-t/ChangeLog
-Wishlist
-.package
+examples/fetch_temp.pl
+examples/simple_dump.pl

@@ -1,0 +1,53 @@
+                            METAR Wishlist
+
+Following is a list of items that I'd like to add to METAR or that
+others have requested. I've listed them here in the order that they're
+likely to be completed.
+
+
+  * Automatically find METAR data in an arbitrary data stream.
+
+    Add a find() function to METAR that will look at a bunch of data
+    and try to find the METAR data. Ideally, it would need no help
+    from the user, but in thinking about it I think the user may have
+    to supply a hint of some sort (like site code).
+
+
+  * Move project to SourceForge.
+
+    I've applied to do so, I just haven't received confirmation quite
+    yet.
+
+
+  * Apply remaining patches.
+
+    A few patches remain in my INBOX. I've changed a lot in the
+    process of applying the larger changes, so I'm going to hold off
+    and apply some of the remaining changes manually after I'm sure
+    nothing major has broken.
+
+
+  * Improved the test suite.
+
+    It'd be nice to have a lot of METARs which encompass various
+    weather condition which we can test against.
+
+
+  * International METAR support.
+
+    Sites around the world use similar (but slightly different)
+    formats for their METARs. I've had several requests to add support
+    for parsing them properly as well.
+
+
+  * Calculate Heat Index and/or Wind Chill
+
+    Both would be fairly easy to do, provided you get the formulas
+    correct.
+        
+
+If you'd like to submit a patch for any of these, please let me know!
+Please put 'METAR' in the subject of your e-mail.
+
+Jeremy@Zawodny.com
+
