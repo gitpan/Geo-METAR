@@ -1,0 +1,67 @@
+                      Readme for Geo::METAR-1.7
+
+	  Accessing Aviation Weather Information with Perl.
+
+     Copyright (c) 1997-98, Jeremy D. Zawodny <jzawodn@wcnet.org>
+
+
+BACKGROUND
+
+    This is the README file for Geo::METAR.pm.
+
+    The Geo::METAR home page is located at:
+      http://www.wcnet.org/~jzawodn/perl/METAR/
+
+    The current version is 1.7. It was released on October 27th, 1998.
+    There may be bugs in the code as well as in the documentation. If
+    you find either, I'd appreciate a patch or at least a mail message
+    to let me know what's wrong.
+
+    Geo::METAR as been developed and tested on Linux and Solaris as
+    well as Windows NT. It may well work on other platforms. If you
+    install it on another platform, I'd like to hear about it. If you
+    develop patches for that platform, I'd REALLY like to hear about
+    it. Send me a note. There's nothing that I know to be
+    platform-dependent in here, but you never know.
+
+
+INSTALLATION
+
+    Installing Geo::METAR is an easy process.
+
+      % perl Makefile.PL
+      % make
+      % make test
+      % make install
+
+
+DOCUMENTATION
+
+    The documentation is built-in to the Geo::METAR module in POD
+    format.  You can use any of the pod2* converters to translate it
+    to a more readable format. The three most common formats are
+    'man', 'html', and 'text'.
+
+    When you ran the 'make install' above, documentation should have
+    been installed on your system such that 'perldoc Geo::METAR' will
+    spit it out.  Of course, you can run your favorite pod converter
+    and generate it in alternative formats.
+
+
+Example Scripts
+
+    The following scripts are included in the examples directory. They are
+    provided as examples. What you do with them is your business.
+
+      simple_dump.pl	       Process a simple METAR.
+      fetch_weather.pl	       Fetch the weather and print it out.
+                               (Not complete yet.)
+
+
+Wish List
+
+    If you're wondering what will come next in Geo::METAR, see the
+    Wishlist file in the distribution directory.
+
+
+$Id: README,v 1.5 1998/10/28 02:39:46 jzawodn Exp jzawodn $

@@ -1,0 +1,17 @@
+			    METAR Wishlist
+
+Following is a list of items that I'd like to add to METAR or that
+others have requested. I've listed them here in the order that they're
+likely to be completed.
+
+Automatically find METAR data in an arbitrary data stream.
+
+    Add a find() function to METAR that will look at a bunch of data
+    and try to find the METAR data. Ideally, it would need no help
+    from the user, but in thinking about it I think the user may have
+    to supply a hint of some sort (like site code).
+
+
+The End.
+
+$Id: Wishlist,v 1.2 1998/06/28 00:36:58 jzawodn Exp $
