@@ -10,9 +10,8 @@ BACKGROUND
     This is the README file for Geo::METAR.pm.
 
     The Geo::METAR home page is located at:
-      http://www.wcnet.org/~jzawodn/perl/METAR/
+      http://www.wcnet.org/~jzawodn/perl/Geo-METAR/
 
-    The current version is 1.7. It was released on October 27th, 1998.
     There may be bugs in the code as well as in the documentation. If
     you find either, I'd appreciate a patch or at least a mail message
     to let me know what's wrong.
@@ -48,7 +47,7 @@ DOCUMENTATION
     and generate it in alternative formats.
 
 
-Example Scripts
+EXAMPLES
 
     The following scripts are included in the examples directory. They are
     provided as examples. What you do with them is your business.
@@ -58,10 +57,13 @@ Example Scripts
                                (Not complete yet.)
 
 
-Wish List
+WISHLIST
 
     If you're wondering what will come next in Geo::METAR, see the
     Wishlist file in the distribution directory.
 
 
 $Id: README,v 1.5 1998/10/28 02:39:46 jzawodn Exp jzawodn $
+
+
+

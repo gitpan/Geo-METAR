@@ -1,4 +1,4 @@
-# $Id: METAR.pm,v 1.7 1998/10/28 03:06:39 jzawodn Exp jzawodn $
+# $Id: METAR.pm,v 1.10 1999/01/10 05:22:37 jzawodn Exp $
 
 # This module is used for decoding NWS METAR code.
 
@@ -120,8 +120,11 @@ use Carp;
 
 ### Globals/Constants
 
-my $VERSION	= '$Revision: 1.7 $';
-my $debug	= 0;
+my $revision = '$Revision: 1.10 $';
+   $revision =~ m/(\d+\.\d+)/;
+   $revision = $1;
+   $VERSION  = $revision;
+my $debug       = 0;
 
 ### Instance Variables
 
@@ -130,45 +133,45 @@ my $debug	= 0;
 
 my %fields = (
 
-	VERSION		=> $VERSION,	        # version number
-	METAR		=> undef,		# the actual, raw METAR
-	TYPE		=> undef,		# the type of report
-	SITE		=> undef,		# site code
-	DATE		=> undef,		# when it was issued
-	TIME		=> undef,		# time it was issued
-	MOD		=> undef,		# modifier (AUTO/COR)
-	WIND_DIR_DEG    => undef,               # wind dir in degrees
-	WIND_DIR_ENG    => undef,               # wind dir in english (NW/SE)
-        WIND_KTS        => undef,               # wind speed (knots)
-        WIND_KTS_GUST   => undef,               # wind gusts (knots)
-        WIND_MPH        => undef,               # wind speed (MPH)
-        WIND_MPH_GUST   => undef,               # wind gusts (MPH)
-        VISIBILITY	=> undef,		# visibility info
-	RUNWAY		=> undef,		# runyway vis.
-	WEATHER		=> [ ],			# current weather
-	SKY		=> [ ],			# curent sky
-	C_TEMP		=> undef,		# current temp, celcius
-	F_TEMP		=> undef,		# converted to farenheit
-	C_DEW		=> undef,		# dew point, celcius
-	F_DEW		=> undef,		# dew point, farenheit
-	ALT		=> undef,		# altimeter setting [pressure]
-	REMARKS		=> undef,		# remarks and such
+    VERSION         => $VERSION,          # version number
+    METAR           => undef,             # the actual, raw METAR
+    TYPE            => undef,             # the type of report
+    SITE            => undef,             # site code
+    DATE            => undef,             # when it was issued
+    TIME            => undef,             # time it was issued
+    MOD             => undef,             # modifier (AUTO/COR)
+    WIND_DIR_DEG    => undef,             # wind dir in degrees
+    WIND_DIR_ENG    => undef,             # wind dir in english (NW/SE)
+    WIND_KTS        => undef,             # wind speed (knots)
+    WIND_KTS_GUST   => undef,             # wind gusts (knots)
+    WIND_MPH        => undef,             # wind speed (MPH)
+    WIND_MPH_GUST   => undef,             # wind gusts (MPH)
+    VISIBILITY      => undef,             # visibility info
+    RUNWAY          => undef,             # runyway vis.
+    WEATHER         => [ ],               # current weather
+    SKY             => [ ],               # curent sky
+    C_TEMP          => undef,             # current temp, celcius
+    F_TEMP          => undef,             # converted to farenheit
+    C_DEW           => undef,             # dew point, celcius
+    F_DEW           => undef,             # dew point, farenheit
+    ALT             => undef,             # altimeter setting [pressure]
+    REMARKS         => undef,             # remarks and such
 
-	tokens		=> [ ],			# the "token" list
-	type		=> "METAR",		# the report type (METAR/SPECI)
-                                                # default=METAR
-	site		=> undef,		# the site code (4 chars)
-	date_time	=> undef,		# date/time
-	modifier	=> "AUTO",		# the AUTO/COR modifier (if
-                                                # any) default=AUTO
-	wind		=> undef,		# the wind information
-	visibility	=> undef,		# visibility information
-	runway		=> undef,		# runway visibility
-	weather		=> [ ],			# current weather conditions
-	sky		=> [ ],			# sky conditions (cloud cover)
-	temp_dew	=> undef,		# temp and dew pt.
-	alt		=> undef,		# altimeter setting
-	remarks		=> [ ]			# remarks
+    tokens          => [ ],               # the "token" list
+    type            => "METAR",           # the report type (METAR/SPECI)
+                                          # default=METAR
+    site            => undef,             # the site code (4 chars)
+    date_time       => undef,             # date/time
+    modifier        => "AUTO",            # the AUTO/COR modifier (if
+                                          # any) default=AUTO
+    wind            => undef,             # the wind information
+    visibility      => undef,             # visibility information
+    runway          => undef,             # runway visibility
+    weather         => [ ],               # current weather conditions
+    sky             => [ ],               # sky conditions (cloud cover)
+    temp_dew        => undef,             # temp and dew pt.
+    alt             => undef,             # altimeter setting
+    remarks         => [ ]                # remarks
 
 ); # end %fields
 
@@ -177,11 +180,11 @@ my %fields = (
 # Constructor.
 
 sub new {
-  my $this = shift;
-  my $class = ref($this) || $this;
-  my $self = {%fields};
-  bless $self, $class;
-  return $self;
+    my $this = shift;
+    my $class = ref($this) || $this;
+    my $self = {%fields};
+    bless $self, $class;
+    return $self;
 }
 
 # ----------------------------------------------- #
@@ -189,14 +192,14 @@ sub new {
 # Autoload for access methods to stuff in %fields hash
 
 sub AUTOLOAD {
-  my $self = shift;
-  my $type = ref($self) || croak "$self is not an object";
-  my $name = $AUTOLOAD;
-  $name =~ s/.*:://;		# strip fully-qualified portion of name
-  unless (exists $self->{$name}) {
-    croak "You suck.  You tried to access something that is not here.";
-  }
-  return $self->{$name};
+    my $self = shift;
+    my $type = ref($self) || croak "$self is not an object";
+    my $name = $AUTOLOAD;
+    $name =~ s/.*:://;          # strip fully-qualified portion of name
+    unless (exists $self->{$name}) {
+        croak "You suck.  You tried to access something that is not here.";
+    }
+    return $self->{$name};
 } # end AUTOLOAD
 
 # ----------------------------------------------- #
@@ -204,22 +207,22 @@ sub AUTOLOAD {
 # Get current version number.
 
 sub version {
-  my $self = shift;
-  print "version() called.\n" if $debug;
-  return $self->{VERSION};
+    my $self = shift;
+    print "version() called.\n" if $debug;
+    return $self->{VERSION};
 }
 
 # ----------------------------------------------- #
 
 sub metar {
-  my $self = shift;
-  if (@_) {
-    $self->{METAR} = shift; 
-    $self->{METAR} =~ s/\n//goi;	# nuke any newlines
-    _tokenize($self);
-    _process($self);
-  }
-  return $self->{METAR};
+    my $self = shift;
+    if (@_) {
+        $self->{METAR} = shift; 
+        $self->{METAR} =~ s/\n//goi;    # nuke any newlines
+        _tokenize($self);
+        _process($self);
+    }
+    return $self->{METAR};
 }
 
 # ----------------------------------------------- #
@@ -227,13 +230,13 @@ sub metar {
 # Break {METAR} into parts. Stuff into @tokens.
 
 sub _tokenize {
-  my $self = shift;
-  my $tok;
-  my @toks;
+    my $self = shift;
+    my $tok;
+    my @toks;
 
-  # Split tokens on whitespace.
-  @toks = split(/\s+/, $self->{METAR});
-  $self->{tokens} = \@toks;
+    # Split tokens on whitespace.
+    @toks = split(/\s+/, $self->{METAR});
+    $self->{tokens} = \@toks;
 
 }
 
@@ -249,258 +252,258 @@ sub _tokenize {
 
 sub _process {
 
-  my $self = shift;
+    my $self = shift;
 
-  my @toks = @{$self->{tokens}};	# copy tokens array...
+    my @toks = @{$self->{tokens}};      # copy tokens array...
 
-  my $tok;
+    my $tok;
 
-  # This is a semi-brute-force way of doing things, but the
-  # amount of data is relatively small, so it shouldn't be
-  # a big deal.
-  #
-  # Ideally, I'd have it skip checks for items which have
-  # been found, but that would make this more "linear" and
-  # I'd remove the pretty while loop.
+    # This is a semi-brute-force way of doing things, but the
+    # amount of data is relatively small, so it shouldn't be
+    # a big deal.
+    #
+    # Ideally, I'd have it skip checks for items which have
+    # been found, but that would make this more "linear" and
+    # I'd remove the pretty while loop.
 
-  while($tok = shift(@toks)) {	# as long as there are tokens
+    while($tok = shift(@toks)) {        # as long as there are tokens
 
-    print "trying to match [$tok]\n" if $debug;
+        print "trying to match [$tok]\n" if $debug;
 
-    # is it a report type?
+        # is it a report type?
 
-    if (($tok =~ /METAR/i) or ($tok =~ /SPECI/i)) {
-      $self->{type} = $tok;
-      print "[$tok] is a report type.\n" if $debug;
-      next;
+        if (($tok =~ /METAR/i) or ($tok =~ /SPECI/i)) {
+            $self->{type} = $tok;
+            print "[$tok] is a report type.\n" if $debug;
+            next;
 
-      # is is a site ID?
-    } elsif ($tok =~ /K[A-Z]{3,3}/) {	
-      $self->{site} = $tok;
-      print "[$tok] is a site ID.\n" if $debug;
-      next;
+            # is is a site ID?
+        } elsif ($tok =~ /K[A-Z]{3,3}/) {       
+            $self->{site} = $tok;
+            print "[$tok] is a site ID.\n" if $debug;
+            next;
 
-      # is it a date/time?
-    } elsif($tok =~ /\d{6,6}Z/i) {
-	$self->{date_time} = $tok;
-	print "[$tok] is a date/time.\n" if $debug;
-	next;
+            # is it a date/time?
+        } elsif($tok =~ /\d{6,6}Z/i) {
+            $self->{date_time} = $tok;
+            print "[$tok] is a date/time.\n" if $debug;
+            next;
 
-	# is it a report modifier?
-      } elsif(($tok =~ /AUTO/i) or ($tok =~ /COR/i)) {
-	$self->{modifier} = $tok;
-	print "[$tok] is a report modifier.\n" if $debug;
-	next;
+            # is it a report modifier?
+        } elsif(($tok =~ /AUTO/i) or ($tok =~ /COR/i)) {
+            $self->{modifier} = $tok;
+            print "[$tok] is a report modifier.\n" if $debug;
+            next;
 
-	# is it wind information?
-      } elsif($tok =~ /.*?KT$/i) {
-	$self->{wind} = $tok;
-	print "[$tok] is wind information.\n" if $debug;
-	next;
+            # is it wind information?
+        } elsif($tok =~ /.*?KT$/i) {
+            $self->{wind} = $tok;
+            print "[$tok] is wind information.\n" if $debug;
+            next;
 
-	# is it visibility information?
-      } elsif($tok =~ /.*?SM$/i) {
-	$self->{visibility} = $tok;
-	print "[$tok] is visibility information.\n" if $debug;
-	next;
+            # is it visibility information?
+        } elsif($tok =~ /.*?SM$/i) {
+            $self->{visibility} = $tok;
+            print "[$tok] is visibility information.\n" if $debug;
+            next;
 
-	# is it visibility information with a leading digit?
-      } elsif($tok =~ /^\d$/) {
+            # is it visibility information with a leading digit?
+        } elsif($tok =~ /^\d$/) {
 
-	$tok .= " " . shift(@toks);
-	$self->{visibility} = $tok;
-	print "[$tok is multi-part visibility information.\n" if $debug;
-	next;
+            $tok .= " " . shift(@toks);
+            $self->{visibility} = $tok;
+            print "[$tok is multi-part visibility information.\n" if $debug;
+            next;
 
-	# is it runway visibility info?
-      } elsif($tok =~ /R.*?FT$/i) {
-	$self->{runway} = $tok;
-	print "[$tok] is runway visual information.\n" if $debug;
-	next;
+            # is it runway visibility info?
+        } elsif($tok =~ /R.*?FT$/i) {
+            $self->{runway} = $tok;
+            print "[$tok] is runway visual information.\n" if $debug;
+            next;
 
-	# is it current weather info?
-      } elsif($tok =~ /^(-|\+|VC)?(TS|SH|FZ|BL|DR|MI|BC|PR|RA|DZ|SN|SG|GR|GS|PE|IC|UP|BR|FG|FU|VA|DU|SA|HZ|PY|PO|SQ|FC|SS|DS)+$/) {
+            # is it current weather info?
+        } elsif($tok =~ /^(-|\+|VC)?(TS|SH|FZ|BL|DR|MI|BC|PR|RA|DZ|SN|SG|GR|GS|PE|IC|UP|BR|FG|FU|VA|DU|SA|HZ|PY|PO|SQ|FC|SS|DS)+$/) {
 
-	push(@{$self->{weather}},$tok);
-	print "[$tok] is current weather.\n" if $debug;
-	next;
+            push(@{$self->{weather}},$tok);
+            print "[$tok] is current weather.\n" if $debug;
+            next;
 
-	# is it sky conditions (clouds)?
-      } elsif(($tok =~ /SKC|CLR/i) or
-	      ($tok =~ /(FEW|SCT|BKN|OVC)(\d\d\d)(CB|TCU)?$/i)) {
-	
-	push(@{$self->{sky}},$tok);
-	print "[$tok] is a sky condition.\n" if $debug;
-	next;
+            # is it sky conditions (clouds)?
+        } elsif(($tok =~ /SKC|CLR/i) or
+                ($tok =~ /(FEW|SCT|BKN|OVC)(\d\d\d)(CB|TCU)?$/i)) {
 
-	# is it temperature and dew point info?
-      } elsif($tok =~ /(M?\d\d)\/(M?\d\d)/i) {
+            push(@{$self->{sky}},$tok);
+            print "[$tok] is a sky condition.\n" if $debug;
+            next;
 
-	$self->{temp_dew} = $tok;
-	print "[$tok] is temperature/dew point information.\n" if $debug;
-	next;
+            # is it temperature and dew point info?
+        } elsif($tok =~ /(M?\d\d)\/(M?\d\d)/i) {
+            next if $self->{temp_dew};
+            $self->{temp_dew} = $tok;
+            print "[$tok] is temperature/dew point information.\n" if $debug;
+            next;
 
-	# is it an altimeter setting?
-      } elsif($tok =~ /A\d{4,4}$/i) {
+            # is it an altimeter setting?
+        } elsif($tok =~ /A\d{4,4}$/i) {
 
-	$self->{alt} = $tok;
-	print "[$tok] is an altimeter setting.\n" if $debug;
-	next;
+            $self->{alt} = $tok;
+            print "[$tok] is an altimeter setting.\n" if $debug;
+            next;
 
-	# remarks?
-      } elsif($tok =~ /^RMK$/i) {
-	
-	push(@{$self->{remarks}},$tok);
-	print "[$tok] is a remark.\n" if $debug;
-	next;
+            # remarks?
+        } elsif($tok =~ /^RMK$/i) {
 
-	# unknown. assume remarks	
-      } else {
+            push(@{$self->{remarks}},$tok);
+            print "[$tok] is a remark.\n" if $debug;
+            next;
 
-	push(@{$self->{remarks}},$tok);
-	print "[$tok] is unknown. Assuming remarks.\n" if $debug;
-	next;
-      }
+        # unknown. assume remarks
+        } else {
 
-  } # end while
+            push(@{$self->{remarks}},$tok);
+            print "[$tok] is unknown. Assuming remarks.\n" if $debug;
+            next;
+        }
 
-  # Now that the internal stuff is set, let's do the external
-  # stuff.
+    } # end while
 
-  if ($self->{type} eq "METAR") {
-    $self->{TYPE} = "Routine Weather Report";
-  }
-  $self->{SITE} = $self->{site};
-  $self->{DATE} = substr($self->{date_time},0,2);
-  $self->{TIME} = substr($self->{date_time},2,4) . " UTC";
-  $self->{TIME} =~ s/(\d\d)(\d\d)/$1:$2/o;
-  $self->{MOD}  = $self->{modifier};
+    # Now that the internal stuff is set, let's do the external
+    # stuff.
 
-  # Okay, wind finally gets interesting.
+    if ($self->{type} eq "METAR") {
+        $self->{TYPE} = "Routine Weather Report";
+    }
+    $self->{SITE} = $self->{site};
+    $self->{DATE} = substr($self->{date_time},0,2);
+    $self->{TIME} = substr($self->{date_time},2,4) . " UTC";
+    $self->{TIME} =~ s/(\d\d)(\d\d)/$1:$2/o;
+    $self->{MOD}  = $self->{modifier};
 
-  {
-    my $wind = $self->{wind};
-    my $dir_deg  = substr($wind,0,3);
-    my $dir_eng = "";
-	
-    # Check for wind direction
-    if ($dir_deg =~ /VRB/i) {
-      $dir_deg = "Variable";
-    } else {
-      if      ($dir_deg < 15) {
-	$dir_eng = "North";
-      } elsif ($dir_deg < 30) {
-	$dir_eng = "North/Northeast";
-      } elsif ($dir_deg < 60) {
-	$dir_eng = "Northeast";
-      } elsif ($dir_deg < 75) {
-	$dir_eng = "East/Northeast";
-      } elsif ($dir_deg < 105) {
-	$dir_eng = "East";
-      } elsif ($dir_deg < 120) {
-	$dir_eng = "East/Southeast";
-      } elsif ($dir_deg < 150) {
-	$dir_eng = "Southeast";
-      } elsif ($dir_deg < 165) {
-	$dir_eng = "South/Southeast";
-      } elsif ($dir_deg < 195) {
-	$dir_eng = "South";
-      } elsif ($dir_deg < 210) {
-	$dir_eng = "South/Southeast";
-      } elsif ($dir_deg < 240) {
-	$dir_eng = "Southwest";
-      } elsif ($dir_deg < 265) {
-	$dir_eng = "South/Southwest";
-      } elsif ($dir_deg < 285) {
-	$dir_eng = "West";
-      } elsif ($dir_deg < 300) {
-	$dir_eng = "West/Northwest";
-      } elsif ($dir_deg < 330) {
-	$dir_eng = "Northwest";
-      } elsif ($dir_deg < 345) {
-	$dir_eng = "North/Northwest";
-      } else {
-	$dir_eng = "North";
-      }
-    } # end if
-	
-    $wind =~ /...(\d\d\d?)/o;
-    my $kts_speed = $1;
-    my $mph_speed = $kts_speed * 1.1508;
-    my $kts_gust = "";
-    my $mph_gust = "";
-	
-    if ($wind =~ /.{5,6}G(\d\d\d?)/o) {
-      $kts_gust = $1;
-      $mph_gust = $kts_gust * 1.1508;
-    } # end if
+    # Okay, wind finally gets interesting.
 
-    $self->{WIND_KTS} = $kts_speed;
-    $self->{WIND_MPH} = $mph_speed;
-	
-    $self->{WIND_KTS_GUST} = $kts_gust;
-    $self->{WIND_MPH_GUST} = $mph_gust;
+    {
+        my $wind = $self->{wind};
+        my $dir_deg  = substr($wind,0,3);
+        my $dir_eng = "";
 
-    $self->{WIND_DIR_DEG} = $dir_deg;
-    $self->{WIND_DIR_ENG} = $dir_eng;
+        # Check for wind direction
+        if ($dir_deg =~ /VRB/i) {
+            $dir_deg = "Variable";
+        } else {
+            if      ($dir_deg < 15) {
+                $dir_eng = "North";
+            } elsif ($dir_deg < 30) {
+                $dir_eng = "North/Northeast";
+            } elsif ($dir_deg < 60) {
+                $dir_eng = "Northeast";
+            } elsif ($dir_deg < 75) {
+                $dir_eng = "East/Northeast";
+            } elsif ($dir_deg < 105) {
+                $dir_eng = "East";
+            } elsif ($dir_deg < 120) {
+                $dir_eng = "East/Southeast";
+            } elsif ($dir_deg < 150) {
+                $dir_eng = "Southeast";
+            } elsif ($dir_deg < 165) {
+                $dir_eng = "South/Southeast";
+            } elsif ($dir_deg < 195) {
+                $dir_eng = "South";
+            } elsif ($dir_deg < 210) {
+                $dir_eng = "South/Southeast";
+            } elsif ($dir_deg < 240) {
+                $dir_eng = "Southwest";
+            } elsif ($dir_deg < 265) {
+                $dir_eng = "South/Southwest";
+            } elsif ($dir_deg < 285) {
+                $dir_eng = "West";
+            } elsif ($dir_deg < 300) {
+                $dir_eng = "West/Northwest";
+            } elsif ($dir_deg < 330) {
+                $dir_eng = "Northwest";
+            } elsif ($dir_deg < 345) {
+                $dir_eng = "North/Northwest";
+            } else {
+                $dir_eng = "North";
+            }
+        } # end if
 
-  } # end wind block
+        $wind =~ /...(\d\d\d?)/o;
+        my $kts_speed = $1;
+        my $mph_speed = $kts_speed * 1.1508;
+        my $kts_gust = "";
+        my $mph_gust = "";
 
-# Visibility, now.
+        if ($wind =~ /.{5,6}G(\d\d\d?)/o) {
+            $kts_gust = $1;
+            $mph_gust = $kts_gust * 1.1508;
+        } # end if
 
-  {
-    my $vis = $self->{visibility};
-    $vis =~ s/SM$//oi;				# nuke the "SM"
-    if ($vis =~ /M(\d\/\d)/o) {
-      $self->{VISIBILITY} = "Less than $1 statute miles";
-    } else {
-      $self->{VISIBILITY} = $vis . " Statute Miles";
-    } # end if
+        $self->{WIND_KTS} = $kts_speed;
+        $self->{WIND_MPH} = $mph_speed;
 
-} # end visibility block
+        $self->{WIND_KTS_GUST} = $kts_gust;
+        $self->{WIND_MPH_GUST} = $mph_gust;
 
-  # And F/C temperatures.
+        $self->{WIND_DIR_DEG} = $dir_deg;
+        $self->{WIND_DIR_ENG} = $dir_eng;
 
-  {
-    my ($tmp,$dew) = split(/\//, $self->{temp_dew});
+    } # end wind block
 
-    # check for negative values
-    $tmp =~ s/^M/-/o;
-    $dew =~ s/^M/-/o;
+    # Visibility, now.
 
-    # convert celcius to farenheit
-    $self->{C_TEMP} = $tmp;
-    $self->{F_TEMP} = (($tmp * (9/5)) + 32);
-    $self->{C_DEW} = $dew;
-    $self->{F_DEW} = (($dew * (9/5)) + 32);
-  }
+    {
+        my $vis = $self->{visibility};
+        $vis =~ s/SM$//oi;                              # nuke the "SM"
+        if ($vis =~ /M(\d\/\d)/o) {
+            $self->{VISIBILITY} = "Less than $1 statute miles";
+        } else {
+            $self->{VISIBILITY} = $vis . " Statute Miles";
+        } # end if
+
+    } # end visibility block
+
+    # And F/C temperatures.
+
+    {
+        my ($tmp,$dew) = split(/\//, $self->{temp_dew});
+
+        # check for negative values
+        $tmp =~ s/^M/-/o;
+        $dew =~ s/^M/-/o;
+
+        # convert celcius to farenheit
+        $self->{C_TEMP} = $tmp;
+        $self->{F_TEMP} = (($tmp * (9/5)) + 32);
+        $self->{C_DEW} = $dew;
+        $self->{F_DEW} = (($dew * (9/5)) + 32);
+    }
 
 }
 
 # ----------------------------------------------- #
 
 sub print_tokens {
-  my $self = shift;
-  my $tok;
-  foreach $tok (@{$self->{tokens}}) {
-    print "> $tok\n";
-  }
+    my $self = shift;
+    my $tok;
+    foreach $tok (@{$self->{tokens}}) {
+        print "> $tok\n";
+    }
 }
 
 # ----------------------------------------------- #
 
 sub debug {
-  my $self = shift;
-  my $flag = shift;
-  
-  return $debug unless defined $flag;
-  
-  if (($flag eq "Y") or ($flag eq "y") or ($flag == 1)) {
-    $debug = 1;
-  } elsif (($flag eq "N") or ($flag eq "n") or ($flag == 0)) {
-    $debug = 0;
-  }
-  return $debug;
+    my $self = shift;
+    my $flag = shift;
+
+    return $debug unless defined $flag;
+
+    if (($flag eq "Y") or ($flag eq "y") or ($flag == 1)) {
+        $debug = 1;
+    } elsif (($flag eq "N") or ($flag eq "n") or ($flag == 0)) {
+        $debug = 0;
+    }
+    return $debug;
 }
 
 # ----------------------------------------------- #
@@ -509,41 +512,41 @@ sub debug {
 
 sub dump {
 
-  my $self = shift;
+    my $self = shift;
 
-  print "METAR dump follows.\n\n";
+    print "METAR dump follows.\n\n";
 
-  print "type: $self->{type}\n";
-  print "site: $self->{site}\n";
-  print "date_time: $self->{date_time}\n";
-  print "modifier: $self->{modifier}\n";
-  print "wind: $self->{wind}\n";
-  print "visibility: $self->{visibility}\n";
-  print "runway: $self->{runway}\n";
-  print "weather: " . join(', ', @{$self->{weather}}) . "\n";
-  print "sky: " . join(', ', @{$self->{sky}}) . "\n";
-  print "temp_dew: $self->{temp_dew}\n";
-  print "alt: $self->{alt}\n";
-  print "remarks: " . join (', ', @{$self->{remarks}}) . "\n";
-  print "\n";
-  print "VERSION: $self->{VERSION}\n";
-  print "METAR: $self->{METAR}\n";
-  print "TYPE: $self->{TYPE}\n";
-  print "SITE: $self->{SITE}\n";
-  print "DATE: $self->{DATE}\n";
-  print "TIME: $self->{TIME}\n";
-  print "MOD: $self->{MOD}\n";
-  print "WIND_DIR_DEG: $self->{WIND_DIR_DEG}\n";
-  print "WIND_DIR_ENG: $self->{WIND_DIR_ENG}\n";
-  print "WIND_KTS: $self->{WIND_KTS}\n";
-  print "WIND_MPH: $self->{WIND_MPH}\n";
-  print "WIND_KTS_GUST: $self->{WIND_KTS_GUST}\n";
-  print "WIND_MPH_GUST: $self->{WIND_MPH_GUST}\n"; 
-  print "VISIBILITY: $self->{VISIBILITY}\n";
-  print "C_TEMP: $self->{C_TEMP}\n";
-  print "F_TEMP: $self->{F_TEMP}\n";
-  print "C_DEW: $self->{C_DEW}\n";
-  print "F_DEW: $self->{F_DEW}\n";
+    print "type: $self->{type}\n";
+    print "site: $self->{site}\n";
+    print "date_time: $self->{date_time}\n";
+    print "modifier: $self->{modifier}\n";
+    print "wind: $self->{wind}\n";
+    print "visibility: $self->{visibility}\n";
+    print "runway: $self->{runway}\n";
+    print "weather: " . join(', ', @{$self->{weather}}) . "\n";
+    print "sky: " . join(', ', @{$self->{sky}}) . "\n";
+    print "temp_dew: $self->{temp_dew}\n";
+    print "alt: $self->{alt}\n";
+    print "remarks: " . join (', ', @{$self->{remarks}}) . "\n";
+    print "\n";
+    print "VERSION: $self->{VERSION}\n";
+    print "METAR: $self->{METAR}\n";
+    print "TYPE: $self->{TYPE}\n";
+    print "SITE: $self->{SITE}\n";
+    print "DATE: $self->{DATE}\n";
+    print "TIME: $self->{TIME}\n";
+    print "MOD: $self->{MOD}\n";
+    print "WIND_DIR_DEG: $self->{WIND_DIR_DEG}\n";
+    print "WIND_DIR_ENG: $self->{WIND_DIR_ENG}\n";
+    print "WIND_KTS: $self->{WIND_KTS}\n";
+    print "WIND_MPH: $self->{WIND_MPH}\n";
+    print "WIND_KTS_GUST: $self->{WIND_KTS_GUST}\n";
+    print "WIND_MPH_GUST: $self->{WIND_MPH_GUST}\n"; 
+    print "VISIBILITY: $self->{VISIBILITY}\n";
+    print "C_TEMP: $self->{C_TEMP}\n";
+    print "F_TEMP: $self->{F_TEMP}\n";
+    print "C_DEW: $self->{C_DEW}\n";
+    print "F_DEW: $self->{F_DEW}\n";
 }
 
 # ----------------------------------------------- #
@@ -781,28 +784,26 @@ Older versions of this module were installed as "METAR" instaed of
 =head2 Adding a find() method.
 
 I shoule add a function called find() which can be passed a big chunk
-of text (or a ref to one) and a site identifier. It will scan through the
-text and find the METAR. The result can be fed back into this module
-for processing.
+of text (or a ref to one) and a site identifier. It will scan through
+the text and find the METAR. The result can be fed back into this
+module for processing.
 
 That'd be cool, I think.
 
 =head1 BUGS
 
-Who knows... If you find one, let me know.
+The only known bug was corrected in the latest release. Please report
+any bugs that you find.
 
-=head1 AUHTOR
+=head1 AUHTOR AND COPYRIGHT
 
-Jeremy D. Zawodny
+Copyright 1998-99, Jeremy D. Zawodny <jzawodn@wcnet.org>
 
-jzawodn@pobox.com
+Geo::METAR is covered under the GNU Public License (GPL) version 2 or
+later.
 
-http://www.wcnet.org/~jzawodn/
+The Net::CDDB Web site is located at:
 
-=head1 COPYRIGHT
+  http://www.wcnet.org/~jzawodn/perl/Geo-METAR/
 
-Geo::METAR.pm is Copyright (C) 1997-1998 Jeremy D. Zawodny <jzawodn@pobox.com>
-
-Don't steal my stuff and call it your own.
-
-Geo::METAR.pm is covered by the same license as Perl5.
+=cut

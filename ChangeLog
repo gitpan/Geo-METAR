@@ -1,0 +1,57 @@
+Sun Jan 10 05:22:37 1999  jzawodn  <jzawodn@peach.z.org>
+
+	* METAR.pm: Fixed up the POD.
+
+	* METAR.pm: Fixed Version info.
+
+	* METAR.pm: Fixed temperature finding problem.
+
+Wed Oct 28 03:06:39 1998  jzawodn  <jzawodn@peach.z.org>
+
+	* METAR.pm: Minor doc updates for the Geo:: change.
+
+	* test.pl: Updaed for Geo:: changes.
+
+	* METAR.pm:
+	Added Geo:: prefixes where they seem to be necessary. Need to test.
+
+	* README: Added Geo:: prefixes where necessary.
+
+	* Makefile.PL: Added Geo:: prefix.
+
+	* Makefile.PL: Initial revision
+
+Sun Jun 28 04:10:34 1998  jzawodn  <jzawodn@peach.z.org>
+
+	* README: Updated version number.
+
+	* METAR.pm: Added all the wind speed and directional variables.
+
+	* METAR.pm: Added lots of docs.
+
+	* test.pl: Added additional tests.
+
+	* README: Added the simple_dump.pl reference.
+
+	* test.pl: Tested.
+
+	* test.pl: Fixed references.
+
+	* test.pl: Initial revision
+
+	* METAR.pm: Fixing up POD.
+
+	* README: Fixed up old filename references and such.
+
+	* README: Initial revision
+
+	* Wishlist: Added the find() method to the list.
+
+	* Wishlist: Initial revision
+
+Sat Jun 27 22:29:07 1998  jzawodn  <jzawodn@peach.z.org>
+
+	* METAR.pm: Put into RCS.
+
+	* METAR.pm: Initial revision
+
