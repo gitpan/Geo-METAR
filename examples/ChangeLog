@@ -1,6 +1,11 @@
-Sat Feb 20 23:02:48 1999  jzawodn  <jzawodn@peach.z.org>
+Fri Nov 19 00:11:58 1999  jzawodn  <jzawodn@peach>
 
-	* fetch_temp.pl: Small fixes.
+	* fetch_temp.pl: Updated URL. Thanks to jong@watchguard.com.
 
 	* fetch_temp.pl: Initial revision
+
+	* simple_dump.pl:
+	Changed "METAR" to "Geo::METAR" as pointed out by jong@watchguard.com.
+
+	* simple_dump.pl: Initial revision
 

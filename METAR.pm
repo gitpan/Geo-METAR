@@ -1,4 +1,4 @@
-# $Id: METAR.pm,v 1.12 1999/02/20 22:36:04 jzawodn Exp $
+# $Id: METAR.pm,v 1.4 1999/11/19 00:41:09 jzawodn Exp $
 
 # This module is used for decoding NWS METAR code.
 
@@ -120,7 +120,7 @@ use Carp;
 
 ### Globals/Constants
 
-my $revision = '$Revision: 1.12 $';
+my $revision = 'Revision: 1.13';
    $revision =~ m/(\d+\.\d+)/;
    $revision = $1;
    $VERSION  = $revision;
@@ -585,10 +585,10 @@ weather.
 =head2 How you might use this
 
 Here is how you I<might> use the Geo::METAR module.
- 
+
 One use that I have had for this module is to query the NWS METAR page
 (using the LWP modules) at
-http://tgsv5.nws.noaa.gov/cgi-bin/mgetmetar.pl?cccc=KFDY to get an
+http://weather.noaa.gov/cgi-bin/mgetmetar.pl?cccc=KFDY to get an
 up-to-date METAR. Then, I scan thru the output, looking for what looks
 like a METAR string (that's not hard in Perl). Oh, KFDY can be any site
 location code where there is a reporting station.
@@ -609,8 +609,8 @@ unless otherwise documented.
 
 =item metar()
 
-metar() is the function to whwich you should pass a METAR string.
-It will take care of decomposing it into its component parts coverting
+metar() is the function to whwich you should pass a METAR string.  It
+will take care of decomposing it into its component parts converting
 the units and so on.
 
 Example: C<$m-E<gt>metar("KFDY 251450Z 21012G21KT 8SM OVC065 04/M01 A3010 RMK 57014");>
@@ -725,7 +725,7 @@ The current wind gusting speed in Knots.
 
 =item WIND_MPH_GUST
 
-The current wind gustin speed in Miles Per Hour.
+The current wind gusting speed in Miles Per Hour.
 
 =item VISIBILITY
 
@@ -749,7 +749,7 @@ Current sky conditions.
 
 =item C_TEMP
 
-Temperature in Celcius.
+Temperature in Celsius.
 
 =item F_TEMP
 
@@ -757,7 +757,7 @@ Temperature in Farenheit.
 
 =item C_DEW
 
-Dew point in Celcius.
+Dew point in Celsius.
 
 =item F_DEW
 
@@ -782,7 +782,7 @@ Older versions of this module were installed as "METAR" instaed of
 
 =head2 Adding a find() method.
 
-I shoule add a function called find() which can be passed a big chunk
+I should add a function called find() which can be passed a big chunk
 of text (or a ref to one) and a site identifier. It will scan through
 the text and find the METAR. The result can be fed back into this
 module for processing.
@@ -794,9 +794,9 @@ That'd be cool, I think.
 The only known bug was corrected in the latest release. Please report
 any bugs that you find.
 
-=head1 AUHTOR AND COPYRIGHT
+=head1 AUTHOR AND COPYRIGHT
 
-Copyright 1998-99, Jeremy D. Zawodny <jzawodn@wcnet.org>
+Copyright 1997-99, Jeremy D. Zawodny <Jeremy@Zawodny.com>
 
 Geo::METAR is covered under the GNU Public License (GPL) version 2 or
 later.

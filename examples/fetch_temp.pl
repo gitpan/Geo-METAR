@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: fetch_temp.pl,v 1.2 1999/02/20 23:02:48 jzawodn Exp $
+# $Id: fetch_temp.pl,v 1.2 1999/11/19 00:11:58 jzawodn Exp $
 
 # Brief Description
 # =================
@@ -33,7 +33,7 @@ use strict;
 my $ua = new LWP::UserAgent;
 
 my $req = new HTTP::Request GET =>
-  "http://tgsv5.nws.noaa.gov/cgi-bin/mgetmetar.pl?cccc=$site_code";
+  "http://weather.noaa.gov/cgi-bin/mgetmetar.pl?cccc=$site_code";
 
 my $response = $ua->request($req);
 

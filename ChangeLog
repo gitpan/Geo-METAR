@@ -1,57 +1,15 @@
-Sat Feb 20 22:58:27 1999  jzawodn  <jzawodn@peach.z.org>
+Fri Nov 19 00:41:09 1999  jzawodn  <jzawodn@peach>
 
-	* README: Updated examples/fetch_temp.pl reference.
+	* METAR.pm: Minor doc updates.
 
-	* METAR.pm: Doc fixes.
-
-	* METAR.pm: Fixed data scoping problem.
-
-Sun Jan 10 05:47:28 1999  jzawodn  <jzawodn@peach.z.org>
-
-	* README: Removed version number.
-
-	* METAR.pm: Fixed up the POD.
-
-	* METAR.pm: Fixed Version info.
-
-	* METAR.pm: Fixed temperature finding problem.
-
-Wed Oct 28 03:06:39 1998  jzawodn  <jzawodn@peach.z.org>
-
-	* METAR.pm: Minor doc updates for the Geo:: change.
-
-	* METAR.pm:
-	Added Geo:: prefixes where they seem to be necessary. Need to test.
-
-	* README: Added Geo:: prefixes where necessary.
-
-	* Makefile.PL: Added Geo:: prefix.
-
-	* Makefile.PL: Initial revision
-
-Sun Jun 28 04:10:34 1998  jzawodn  <jzawodn@peach.z.org>
-
-	* README: Updated version number.
-
-	* METAR.pm: Added all the wind speed and directional variables.
-
-	* METAR.pm: Added lots of docs.
-
-	* README: Added the simple_dump.pl reference.
-
-	* METAR.pm: Fixing up POD.
-
-	* README: Fixed up old filename references and such.
+	* README: Minor updates.
 
 	* README: Initial revision
 
-	* Wishlist: Added the find() method to the list.
+	* METAR.pm: Updated revision number. (How'd it get messed up?)
 
-	* Wishlist: Initial revision
-
-Sat Jun 27 22:29:07 1998  jzawodn  <jzawodn@peach.z.org>
-
-	* METAR.pm: Put into RCS.
+	* METAR.pm: Several documentation typos and an updated URL thanks to
+	jong@watchguard.com.
 
 	* METAR.pm: Initial revision
 

@@ -2,7 +2,7 @@
 
 	  Accessing Aviation Weather Information with Perl.
 
-     Copyright (c) 1997-98, Jeremy D. Zawodny <jzawodn@wcnet.org>
+     Copyright (c) 1997-99, Jeremy D. Zawodny <jzawodn@wcnet.org>
 
 
 BACKGROUND
@@ -62,7 +62,7 @@ WISHLIST
     Wishlist file in the distribution directory.
 
 
-$Id: README,v 1.7 1999/02/20 22:58:27 jzawodn Exp $
+$Id: README,v 1.2 1999/11/19 00:37:46 jzawodn Exp $
 
 
 
