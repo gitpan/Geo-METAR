@@ -1,4 +1,4 @@
-# $Id: METAR.pm,v 1.10 1999/01/10 05:22:37 jzawodn Exp $
+# $Id: METAR.pm,v 1.11 1999/02/20 17:44:32 jzawodn Exp $
 
 # This module is used for decoding NWS METAR code.
 
@@ -15,18 +15,18 @@
 #
 # Houston, Texas
 # KHST 251455Z 06017G22KT 7SM FEW040 BKN330 25/18 A3016 RMK SLP213 8/508
-# 9/205 51007 
+# 9/205 51007
 #
 # LA
 # KLAX 251450Z 07004KT 7SM SCT100 BKN200 14/11 A3005 RMK AO2 SLP173
-# T01390111 56005 
+# T01390111 56005
 
 # For METAR info, please see
-# http://tgsv5.nws.noaa.gov/oso/oso1/oso12/metar.htm 
+# http://tgsv5.nws.noaa.gov/oso/oso1/oso12/metar.htm
 
 # The METAR specification is dictated in the Federal Meteorological Handbook
 # which is available on-line at:
-# http://tgsv5.nws.noaa.gov/oso/oso1/oso12/fmh1.htm 
+# http://tgsv5.nws.noaa.gov/oso/oso1/oso12/fmh1.htm
 
 # General Structure is:
 # SITE, DATE/TIME, WIND, VISIBILITY, CLOUDS, TEMPERATURE, PRESSURE, REMARKS
@@ -120,60 +120,12 @@ use Carp;
 
 ### Globals/Constants
 
-my $revision = '$Revision: 1.10 $';
+my $revision = '$Revision: 1.11 $';
    $revision =~ m/(\d+\.\d+)/;
    $revision = $1;
    $VERSION  = $revision;
 my $debug       = 0;
 
-### Instance Variables
-
-# UPPERCASE items have accssor functions (methods), while
-# lowercase items are reserved for internal use.
-
-my %fields = (
-
-    VERSION         => $VERSION,          # version number
-    METAR           => undef,             # the actual, raw METAR
-    TYPE            => undef,             # the type of report
-    SITE            => undef,             # site code
-    DATE            => undef,             # when it was issued
-    TIME            => undef,             # time it was issued
-    MOD             => undef,             # modifier (AUTO/COR)
-    WIND_DIR_DEG    => undef,             # wind dir in degrees
-    WIND_DIR_ENG    => undef,             # wind dir in english (NW/SE)
-    WIND_KTS        => undef,             # wind speed (knots)
-    WIND_KTS_GUST   => undef,             # wind gusts (knots)
-    WIND_MPH        => undef,             # wind speed (MPH)
-    WIND_MPH_GUST   => undef,             # wind gusts (MPH)
-    VISIBILITY      => undef,             # visibility info
-    RUNWAY          => undef,             # runyway vis.
-    WEATHER         => [ ],               # current weather
-    SKY             => [ ],               # curent sky
-    C_TEMP          => undef,             # current temp, celcius
-    F_TEMP          => undef,             # converted to farenheit
-    C_DEW           => undef,             # dew point, celcius
-    F_DEW           => undef,             # dew point, farenheit
-    ALT             => undef,             # altimeter setting [pressure]
-    REMARKS         => undef,             # remarks and such
-
-    tokens          => [ ],               # the "token" list
-    type            => "METAR",           # the report type (METAR/SPECI)
-                                          # default=METAR
-    site            => undef,             # the site code (4 chars)
-    date_time       => undef,             # date/time
-    modifier        => "AUTO",            # the AUTO/COR modifier (if
-                                          # any) default=AUTO
-    wind            => undef,             # the wind information
-    visibility      => undef,             # visibility information
-    runway          => undef,             # runway visibility
-    weather         => [ ],               # current weather conditions
-    sky             => [ ],               # sky conditions (cloud cover)
-    temp_dew        => undef,             # temp and dew pt.
-    alt             => undef,             # altimeter setting
-    remarks         => [ ]                # remarks
-
-); # end %fields
 
 ### Begin Object Methods
 
@@ -182,7 +134,54 @@ my %fields = (
 sub new {
     my $this = shift;
     my $class = ref($this) || $this;
-    my $self = {%fields};
+    my $self = {};
+
+    ### Instance Variables
+
+    # UPPERCASE items have accssor functions (methods), while
+    # lowercase items are reserved for internal use.
+
+    $self->{VERSION}       = $VERSION;          # version number
+    $self->{METAR}         = undef;             # the actual, raw METAR
+    $self->{TYPE}          = undef;             # the type of report
+    $self->{SITE}          = undef;             # site code
+    $self->{DATE}          = undef;             # when it was issued
+    $self->{TIME}          = undef;             # time it was issued
+    $self->{MOD}           = undef;             # modifier (AUTO/COR)
+    $self->{WIND_DIR_DEG}  = undef;             # wind dir in degrees
+    $self->{WIND_DIR_ENG}  = undef;             # wind dir in english (NW/SE)
+    $self->{WIND_KTS}      = undef;             # wind speed (knots)
+    $self->{WIND_KTS_GUST} = undef;             # wind gusts (knots)
+    $self->{WIND_MPH}      = undef;             # wind speed (MPH)
+    $self->{WIND_MPH_GUST} = undef;             # wind gusts (MPH)
+    $self->{VISIBILITY}    = undef;             # visibility info
+    $self->{RUNWAY}        = undef;             # runyway vis.
+    $self->{WEATHER}       = [ ];               # current weather
+    $self->{SKY}           = [ ];               # curent sky
+    $self->{C_TEMP}        = undef;             # current temp, celcius
+    $self->{F_TEMP}        = undef;             # converted to farenheit
+    $self->{C_DEW}         = undef;             # dew point, celcius
+    $self->{F_DEW}         = undef;             # dew point, farenheit
+    $self->{ALT}           = undef;             # altimeter setting [pressure]
+    $self->{REMARKS}       = undef;             # remarks and such
+
+    $self->{tokens}        = [ ];               # the "token" list
+    $self->{type}          = "METAR";           # the report type (METAR/SPECI)
+                                                # default=METAR
+    $self->{site}          = undef;             # the site code (4 chars)
+    $self->{date_time}     = undef;             # date/time
+    $self->{modifier}      = "AUTO";            # the AUTO/COR modifier (if
+                                                # any) default=AUTO
+    $self->{wind}          = undef;             # the wind information
+    $self->{visibility}    = undef;             # visibility information
+    $self->{runway}        = undef;             # runway visibility
+    $self->{weather}       = [ ];               # current weather conditions
+    $self->{sky}           = [ ];               # sky conditions (cloud cover)
+    $self->{temp_dew}      = undef;             # temp and dew pt.
+    $self->{alt}           = undef;             # altimeter setting
+    $self->{remarks}       = [ ];               # remarks
+
+
     bless $self, $class;
     return $self;
 }

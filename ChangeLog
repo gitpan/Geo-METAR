@@ -1,4 +1,10 @@
-Sun Jan 10 05:22:37 1999  jzawodn  <jzawodn@peach.z.org>
+Sat Feb 20 17:44:32 1999  jzawodn  <jzawodn@peach.z.org>
+
+	* METAR.pm: Fixed data scoping problem.
+
+Sun Jan 10 05:47:28 1999  jzawodn  <jzawodn@peach.z.org>
+
+	* README: Removed version number.
 
 	* METAR.pm: Fixed up the POD.
 

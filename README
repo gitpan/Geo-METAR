@@ -1,4 +1,4 @@
-                      Readme for Geo::METAR-1.7
+                        Readme for Geo::METAR
 
 	  Accessing Aviation Weather Information with Perl.
 
@@ -63,7 +63,7 @@ WISHLIST
     Wishlist file in the distribution directory.
 
 
-$Id: README,v 1.5 1998/10/28 02:39:46 jzawodn Exp jzawodn $
+$Id: README,v 1.6 1999/01/10 05:47:28 jzawodn Exp $
 
 
 
