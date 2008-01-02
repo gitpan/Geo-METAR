@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: metar.t,v 1.4 2000/11/24 23:43:08 jzawodn Exp $
+# $Id: metar.t,v 1.1 2007/11/13 21:19:27 koos Exp $
 #
 # Test script for METAR installation.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: fetch_temp.pl,v 1.3 2000/11/25 00:03:12 jzawodn Exp $
+# $Id: fetch_temp.pl,v 1.1 2007/11/13 21:19:27 koos Exp $
 
 # Brief Description
 # =================

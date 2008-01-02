@@ -1,7 +1,6 @@
 METAR.pm
 Makefile.PL
 README
-HACKING
 TODO
 t/metar.t
 examples/fetch_temp.pl

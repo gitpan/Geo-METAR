@@ -3,6 +3,7 @@
           Accessing Aviation Weather Information with Perl.
 
    Copyright (c) 1997-2000, Jeremy D. Zawodny <Jeremy@Zawodny.com>
+   Copyright (c) 2007, Koos van den Hout <koos@kzdoos.xs4all.nl>
 
 
 BACKGROUND
@@ -11,7 +12,7 @@ BACKGROUND
 
     The Geo::METAR home page is located at:
 
-        http://www.wcnet.org/jzawodn/perl/Geo-METAR/
+        http://idefix.net/~koos/perl/Geo-METAR/
 
     There may be bugs in the code as well as in the documentation. If
     you find either, I'd appreciate a patch or at least a mail message
@@ -59,7 +60,7 @@ EXAMPLE SCRIPTS
     directory. They are provided as examples. They should provide an
     idea of what you can do with this module.
 
-      simple_dump.pl	       Process a simple METAR.
+      simple_dump.pl       Process a simple METAR.
       fetch_temp.pl	       Fetch the temperature and print it out.
 
     If you develop a good example that would be useful to others, I'd

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: simple_dump.pl,v 1.2 1999/11/19 00:10:57 jzawodn Exp $
+# $Id: simple_dump.pl,v 1.1 2007/11/13 21:19:27 koos Exp $
 
 # Example script for METAR.pm.
 
